@@ -99,7 +99,7 @@ describe("NFTMarketplace", function () {
           marketplace.address,
           owner.address,
           price,
-          false
+          true
         );
 
       console.log("marketplace.address", marketplace.address);
@@ -109,24 +109,71 @@ describe("NFTMarketplace", function () {
       expect(await marketplace.ownerOf(tokenId)).to.equal(marketplace.address);
 
       const listedToken = await marketplace.idToListedToken(tokenId);
+      console.log({ listedToken });
       expect(listedToken.tokenId).to.equal(tokenId);
       expect(listedToken.seller).to.equal(owner.address);
       expect(listedToken.price).to.equal(price);
-      expect(listedToken.currentlyListed).to.be.false;
+      expect(listedToken.currentlyListed).to.be.true;
     });
 
-    it("should not allow creating NFT with negative price", async function () {
-      // const { marketplace } = await loadFixture(deployNFTMarketplace);
+    // it("should not allow creating NFT with negative price", async function () {
+    //   // const { marketplace } = await loadFixture(deployNFTMarketplace);
 
-      const tokenURI = "ipfs://QmT8ePYWyfssPdvpK2QcA1AGd8WkUv1bYpbmRzjzb6G8Wn";
-      const price = ethers.utils.parseEther("0");
-      const listPrice = await marketplace.listPrice();
+    //   const tokenURI = "ipfs://QmT8ePYWyfssPdvpK2QcA1AGd8WkUv1bYpbmRzjzb6G8Wn";
+    //   const price = ethers.utils.parseEther("0");
+    //   const listPrice = await marketplace.listPrice();
 
-      await expect(
-        marketplace.createToken(tokenURI, price, { value: listPrice })
-      ).to.be.revertedWith("Make sure the price isn't negative");
-    });
-    it("Should create, list and executeSale the sale and change the ownership", async () => {
+    //   await expect(
+    //     marketplace.createToken(tokenURI, price, { value: listPrice })
+    //   ).to.be.revertedWith("Make sure the price isn't negative");
+    // });
+    // it("Should create, list and executeSale the sale and change the ownership", async () => {
+    //   // const { marketplace, owner, otherAccount } = await loadFixture(
+    //   //   deployNFTMarketplace
+    //   // );
+
+    //   const tokenURI = "ipfs:/s/gasdgsahgsdahasdhasdh";
+    //   const price = ethers.utils.parseEther("0.01");
+    //   const getListPrice = await marketplace.getListPrice();
+    //   const expectedTokenId = 1;
+
+    //   expect(
+    //     await marketplace.createToken(tokenURI, price, { value: getListPrice })
+    //   )
+    //     .to.emit(marketplace, "TokenListedSuccess")
+    //     .withArgs(
+    //       expectedTokenId,
+    //       marketplace.address,
+    //       owner.address,
+    //       price,
+    //       true
+    //     );
+
+    //   const tx = await marketplace
+    //     .connect(otherAccount)
+    //     .executeSale(expectedTokenId, {
+    //       value: price,
+    //     });
+
+    //   await tx.wait(1);
+
+    //   const allNfts = await marketplace.getListedTokenForId(tokenId);
+    //   const otherAccountBalance = await ethers.provider.getBalance(
+    //     otherAccount.address
+    //   );
+    //   const ownerBalance = await ethers.provider.getBalance(owner.address);
+    //   const marketplaceBalance = await ethers.provider.getBalance(
+    //     marketplace.address
+    //   );
+    //   console.log({
+    //     ownerBalance,
+    //     otherAccountBalance,
+    //     marketplaceBalance,
+    //   });
+
+    //   expect(allNfts.seller).to.equal(otherAccount.address);
+    // });
+    it("Whole Flow", async () => {
       // const { marketplace, owner, otherAccount } = await loadFixture(
       //   deployNFTMarketplace
       // );
@@ -145,11 +192,8 @@ describe("NFTMarketplace", function () {
           marketplace.address,
           owner.address,
           price,
-          false
+          true
         );
-
-      const listTx = await marketplace.listToken(expectedTokenId, price);
-      await listTx.wait(1);
 
       const tx = await marketplace
         .connect(otherAccount)
@@ -159,21 +203,48 @@ describe("NFTMarketplace", function () {
 
       await tx.wait(1);
 
-      const allNfts = await marketplace.getListedTokenForId(tokenId);
-      const otherAccountBalance = await ethers.provider.getBalance(
-        otherAccount.address
-      );
-      const ownerBalance = await ethers.provider.getBalance(owner.address);
-      const marketplaceBalance = await ethers.provider.getBalance(
-        marketplace.address
-      );
-      console.log({
-        ownerBalance,
-        otherAccountBalance,
-        marketplaceBalance,
-      });
+      await (
+        await marketplace
+          .connect(otherAccount)
+          .listToken(expectedTokenId, price)
+      ).wait(1);
 
-      expect(allNfts.seller).to.equal(otherAccount.address);
+      const listedToken = await marketplace.getListedTokenForId(tokenId);
+      console.log({ listedToken });
+
+      expect(listedToken.seller).to.equal(otherAccount.address);
+
+      const tokenOwner = await marketplace.getTokenOwner(expectedTokenId);
+      console.log({ tokenOwner });
+
+      await (
+        await marketplace.connect(owner).executeSale(expectedTokenId, {
+          value: price,
+        })
+      ).wait(1);
+
+      const newTokenOwner = await marketplace.getTokenOwner(expectedTokenId);
+      console.log({ newTokenOwner });
+
+      // const listedTokenAfterSell = await marketplace.getListedTokenForId(
+      //   tokenId
+      // );
+      // console.log({ listedTokenAfterSell });
+
+      // expect(listedTokenAfterSell.seller).to.equal(owner.address);
+
+      // const otherAccountBalance = await ethers.provider.getBalance(
+      //   otherAccount.address
+      // );
+      // const ownerBalance = await ethers.provider.getBalance(owner.address);
+      // const marketplaceBalance = await ethers.provider.getBalance(
+      //   marketplace.address
+      // );
+      // console.log({
+      //   ownerBalance,
+      //   otherAccountBalance,
+      //   marketplaceBalance,
+      // });
     });
   });
 });

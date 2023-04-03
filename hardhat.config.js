@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-chai-matchers");
 require("@nomiclabs/hardhat-ethers");
+require("solidity-coverage");
+require("hardhat-gas-reporter");
 require("dotenv").config();
 
 // task action function receives the Hardhat Runtime Environment as second argument
@@ -40,5 +42,12 @@ module.exports = {
         runs: 200,
       },
     },
+  },
+  gasReporter: {
+    enabled: true,
+    currency: "USD",
+    outputFile: "gas-report.txt",
+    noColors: true,
+    // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
 };

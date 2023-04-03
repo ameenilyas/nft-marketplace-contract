@@ -79,7 +79,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
             payable(address(this)),
             payable(msg.sender),
             price,
-            false
+            true
         );
 
         _transfer(msg.sender, address(this), tokenId);
@@ -89,7 +89,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
             address(this),
             msg.sender,
             price,
-            false
+            true
         );
     }
 
@@ -100,12 +100,18 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         );
         idToListedToken[tokenId].currentlyListed = true;
         idToListedToken[tokenId].price = price;
+
+        //Actually transfer the token to the new owner
+        _transfer(msg.sender, address(this), tokenId);
     }
 
     function unlistToken(uint256 tokenId) public {
         require(ownerOf(tokenId) == msg.sender, "You don't own this NFT");
         idToListedToken[tokenId].currentlyListed = false;
         idToListedToken[tokenId].price = 0;
+
+        //Actually transfer the token to the new owner
+        _transfer(address(this), msg.sender, tokenId);
     }
 
     /* allows someone to resell a token they have purchased */
@@ -234,5 +240,9 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
 
     function getCurrentToken() public view returns (uint256) {
         return _tokenIds.current();
+    }
+
+    function getTokenOwner(uint256 tokenId) public view returns (address) {
+        return ownerOf(tokenId);
     }
 }
