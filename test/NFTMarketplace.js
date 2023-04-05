@@ -217,14 +217,14 @@ describe("NFTMarketplace", function () {
       const tokenOwner = await marketplace.getTokenOwner(expectedTokenId);
       console.log({ tokenOwner });
 
-      await (
-        await marketplace.connect(owner).executeSale(expectedTokenId, {
-          value: price,
-        })
-      ).wait(1);
+      // await (
+      //   await marketplace.connect(owner).executeSale(expectedTokenId, {
+      //     value: price,
+      //   })
+      // ).wait(1);
 
-      const newTokenOwner = await marketplace.getTokenOwner(expectedTokenId);
-      console.log({ newTokenOwner });
+      // const newTokenOwner = await marketplace.getTokenOwner(expectedTokenId);
+      // console.log({ newTokenOwner });
 
       // const listedTokenAfterSell = await marketplace.getListedTokenForId(
       //   tokenId

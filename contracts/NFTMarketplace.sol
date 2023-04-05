@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 //Console functions to help debug the smart contract just like in Javascript
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 //OpenZeppelin's NFT Standard Contracts. We will extend functions from this in our implementation
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
